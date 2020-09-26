@@ -294,12 +294,10 @@ main(int argc, char **argv)
         gchar **channels;
         gint i;
 
-        g_print("%s\n", _("Channels:"));
-
         channels = xfconf_list_channels();
         if(G_LIKELY(channels)) {
             for(i = 0; channels[i]; ++i)
-                g_print("  %s\n", channels[i]);
+                g_print("%s\n", channels[i]);
             g_strfreev(channels);
         }
         else
@@ -367,10 +365,12 @@ main(int argc, char **argv)
                 return EXIT_FAILURE;
             }
 
-            if(G_TYPE_PTR_ARRAY != G_VALUE_TYPE(&value))
+            GType value_type = G_VALUE_TYPE(&value);
+            if(G_TYPE_PTR_ARRAY != value_type)
             {
+                const gchar *type_name = g_type_name(value_type);
                 gchar *str_val = _xfconf_string_from_gvalue(&value);
-                g_print("%s\n", str_val ? str_val : _("(unknown)"));
+                g_print("t:%s %s\n", type_name, str_val ? str_val : _("(unknown)"));
                 g_free(str_val);
                 g_value_unset(&value);
             }
@@ -379,8 +379,7 @@ main(int argc, char **argv)
                 GPtrArray *arr = g_value_get_boxed(&value);
                 guint i;
 
-                g_print(_("Value is an array with %d items:"), arr->len);
-                g_print("\n\n");
+                g_print(_("a:%d\n"), arr->len);
 
                 for(i = 0; i < arr->len; ++i)
                 {
@@ -388,8 +387,9 @@ main(int argc, char **argv)
 
                     if(item_value)
                     {
+                        const gchar *type_name = g_type_name(G_VALUE_TYPE(item_value));
                         gchar *str_val = _xfconf_string_from_gvalue(item_value);
-                        g_print("%s\n", str_val ? str_val : _("(unknown)"));
+                        g_print("t:%s %s\n", type_name, str_val ? str_val : _("(unknown)"));
                         g_free(str_val);
                     }
                 }
